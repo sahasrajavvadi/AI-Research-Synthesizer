@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyze - AI Research Synthesizer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='analyze.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <i class="fas fa-microscope"></i>
+                <span>AI Research Synthesizer</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/analyze" class="active">Analyze</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="analyze-container">
+        <div class="sidebar">
+            <!-- API Initialization -->
+            <section class="sidebar-section">
+                <h3>⚙️ Configuration</h3>
+                <button id="initApiBtn" class="btn btn-primary btn-block">
+                    <i class="fas fa-key"></i> Initialize API
+                </button>
+                <div id="apiStatus" class="status-message"></div>
+            </section>
+
+            <!-- File Upload -->
+            <section class="sidebar-section">
+                <h3>📤 Upload Research Papers</h3>
+                
+                <div class="upload-area" id="uploadArea">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Drag PDFs here or click to select</p>
+                </div>
+                
+                <input type="file" id="fileInput" multiple accept=".pdf" style="display:none;">
+                
+                <div id="fileList" class="file-list"></div>
+                
+                <button id="processBtn" class="btn btn-primary btn-block" disabled>
+                    <i class="fas fa-cog"></i> Process Documents
+                </button>
+                
+                <div id="processStatus" class="status-message"></div>
+                
+                <button id="clearBtn" class="btn btn-secondary btn-block" style="display:none;">
+                    <i class="fas fa-refresh"></i> Clear & Start Over
+                </button>
+            </section>
+
+            <!-- Statistics -->
+            <section class="sidebar-section" id="statsSection" style="display:none;">
+                <h3>📊 Statistics</h3>
+                <div id="stats" class="stats-box"></div>
+            </section>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <!-- Welcome Section -->
+            <section id="welcomeSection" class="welcome-section">
+                <div class="welcome-grid">
+                    <div class="welcome-card">
+                        <h2>🎯 How It Works</h2>
+                        <ul>
+                            <li>✅ Upload PDFs</li>
+                            <li>✅ Process documents</li>
+                            <li>✅ Choose analysis type</li>
+                            <li>✅ Get synthesized answers</li>
+                            <li>✅ See sources used</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="welcome-card">
+                        <h2>✨ Advanced Features</h2>
+                        <ul>
+                            <li>🔬 Research Gaps Detection</li>
+                            <li>📊 Method Comparison</li>
+                            <li>📈 Trend Analysis</li>
+                            <li>📋 Comparison Tables</li>
+                            <li>🔗 Detailed Citations</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="info-box">
+                    <i class="fas fa-info-circle"></i>
+                    <p><strong>Get started:</strong> Initialize the API and upload PDFs in the sidebar. Then ask questions by typing or using <i class="fas fa-microphone"></i> voice input in any supported language.</p>
+                </div>
+            </section>
+
+            <!-- Analysis Section -->
+            <section id="analysisSection" class="analysis-section" style="display:none;">
+                <!-- Quick Action Buttons -->
+                <div class="quick-actions card-elevated">
+                    <h3><i class="fas fa-bolt"></i> Quick analysis</h3>
+                    <p class="quick-actions-hint">One-click analysis types; or type/voice your own question below.</p>
+                    <div class="button-grid">
+                        <button class="action-btn" data-type="gaps">
+                            <i class="fas fa-flask"></i>
+                            <span>Find Research Gaps</span>
+                        </button>
+                        
+                        <button class="action-btn" data-type="compare">
+                            <i class="fas fa-project-diagram"></i>
+                            <span>Compare Methods</span>
+                        </button>
+                        
+                        <button class="action-btn" data-type="summarize">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Summarize All</span>
+                        </button>
+                        
+                        <button class="action-btn" data-type="trends">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Trend Analysis</span>
+                        </button>
+                        
+                        <button class="action-btn" data-type="table">
+                            <i class="fas fa-table"></i>
+                            <span>Comparison Table</span>
+                        </button>
+                        
+                        <button class="action-btn" data-type="citations">
+                            <i class="fas fa-link"></i>
+                            <span>Detailed Citations</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- RAG Question Box with voice input -->
+                <div class="query-section card-elevated">
+                    <div class="query-section-header">
+                        <h3><i class="fas fa-comment-dots"></i> Ask in any language</h3>
+                        <span class="query-badge">RAG · document-grounded only</span>
+                    </div>
+                    <p class="query-hint">Type your question and the LLM will provide answers grounded in your documents. <kbd>Ctrl</kbd>+<kbd>Enter</kbd> to send.</p>
+                    
+                    <div class="query-input-wrap">
+                        <textarea id="queryInput" class="query-textarea" placeholder="e.g. Summarize all my documents · Compare methods · What are the research gaps?" rows="4"></textarea>
+                        <div class="query-toolbar">
+                            <button type="button" id="synthesizeBtn" class="btn btn-primary btn-ask">
+                                <i class="fas fa-paper-plane"></i> Ask
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Section -->
+                <div id="resultsSection" class="results-section" style="display:none;">
+                    <div class="result-header">
+                        <h2><i class="fas fa-file-alt"></i> Analysis Result</h2>
+                        <div class="result-actions">
+                            <button type="button" id="copyBtn" class="btn btn-ghost" title="Copy answer to clipboard">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                            <button type="button" id="downloadBtn" class="btn btn-secondary">
+                                <i class="fas fa-download"></i> Download
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="answerBox" class="answer-box">
+                        <div id="answerContent" class="markdown-content"></div>
+                    </div>
+                    
+                    <div id="sourcesBox" class="sources-box">
+                        <h3>📚 Sources Used</h3>
+                        <div id="sourcesList"></div>
+                    </div>
+                </div>
+
+                <!-- Loading Spinner -->
+                <div id="loadingSpinner" class="loading-spinner" style="display:none;">
+                    <div class="spinner"></div>
+                    <p id="loadingText">Synthesizing answer...</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='analyze.js') }}"></script>
+</body>
+</html>
